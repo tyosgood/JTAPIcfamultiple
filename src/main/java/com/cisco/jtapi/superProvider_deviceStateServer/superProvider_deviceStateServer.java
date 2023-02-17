@@ -51,6 +51,7 @@ import java.time.LocalDateTime;
 
 import javax.telephony.*;
 import java.util.*;
+import java.io.*;
 import com.cisco.jtapi.extensions.*;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -66,6 +67,10 @@ public class superProvider_deviceStateServer {
     // Create a hash map to get friendly names for the device states
     public static Map <Integer, String> stateName = new HashMap<Integer, String>();
 
+     //get list of devices to monitor
+    public static Map<String, String> deviceList = HashMapFromTextFile();
+  
+
     public static void main(String[] args) throws
 
     JtapiPeerUnavailableException, ResourceUnavailableException, MethodNotSupportedException, InvalidArgumentException,
@@ -80,6 +85,15 @@ public class superProvider_deviceStateServer {
             
         // Retrieve environment variables from .env, if present
         Dotenv dotenv=Dotenv.load();
+
+      
+        // iterate over device list HashMap entries
+        for (Map.Entry<String, String> entry :
+             deviceList.entrySet()) {
+            System.out.println(entry.getKey() + " : "
+                               + entry.getValue());
+        }
+
  
         // The Handler class provides observers for provider/address/terminal/call events
         Handler handler = new Handler();
@@ -101,32 +115,90 @@ public class superProvider_deviceStateServer {
         provider.addObserver(handler);
         handler.providerInService.waitTrue();
 
-        // Dynamically create a terminal by device name via 'Super Provider' feature
-        log("Creating phoneTerminal using device name: " + dotenv.get("ALICE_DEVICE_NAME"));
-        CiscoTerminal phoneTerminal = (CiscoTerminal) provider.createTerminal(dotenv.get("ALICE_DEVICE_NAME"));
+       
+        
 
-        log("Awaiting CiscoTermInServiceEv for: "+phoneTerminal.getName() + "...");
-        phoneTerminal.addObserver(handler);
-        handler.phoneTerminalInService.waitTrue();
+        //Create Array list to hold the terminal objects
+        List<CiscoTerminal> terminalList = new ArrayList<CiscoTerminal>();
 
-         // Check the current device state
-        int currentState = phoneTerminal.getDeviceState();
+        
+        //create a Terminal for each device in the deviceList (from CSV)
+        for (Map.Entry<String, String> entry : deviceList.entrySet()) {
+                log("Creating phoneTerminal using device name: " + entry.getKey());
+                terminalList.add((CiscoTerminal) provider.createTerminal((entry.getKey()))); 
+        }
+        
+        //add observer and set filters for each terminal
+        for (int i = 0; i < terminalList.size(); i++){
+           //add observer for each terminal
+           terminalList.get(i).addObserver(handler);
 
-        log("INITIAL DEVICE STATE--> " + stateName.get(currentState));
+           //add filters for each terminal
+           CiscoTermEvFilter termFilter = terminalList.get(i).getFilter();
 
-        // Enable filters to receive various device state events
-        CiscoTermEvFilter termFilter = phoneTerminal.getFilter();
+            termFilter.setDeviceStateIdleEvFilter(true);
+            termFilter.setDeviceStateActiveEvFilter(true);
+            termFilter.setDeviceStateAlertingEvFilter(true);
+            termFilter.setDeviceStateHeldEvFilter(true);
+            termFilter.setDeviceStateWhisperEvFilter(false); 
 
-        termFilter.setDeviceStateIdleEvFilter(true);
-        termFilter.setDeviceStateActiveEvFilter(true);
-        termFilter.setDeviceStateAlertingEvFilter(true);
-        termFilter.setDeviceStateHeldEvFilter(true);
-        termFilter.setDeviceStateWhisperEvFilter(true);
+            terminalList.get(i).setFilter(termFilter);
 
-        phoneTerminal.setFilter(termFilter);
+            //log terminal montior
+            log("Monitoring state changes for: "+terminalList.get(i).getName()+"...");
 
-        // The handler thread will run idefinitely, displaying any received 
-        // terminal state events
-        log("Monitoring state changes for: "+phoneTerminal.getName()+"...");
+        }
+            
+    }
+
+    public static Map<String, String> HashMapFromTextFile()
+    {
+
+        Map<String, String> map
+            = new HashMap<String, String>();
+        BufferedReader br = null;
+
+        try {
+
+            // create file object
+            File file = new File("src/main/java/com/cisco/jtapi/superProvider_deviceStateServer/monitorList.csv");
+
+            // create BufferedReader object from the File
+            br = new BufferedReader(new FileReader(file));
+
+            String line = null;
+
+            // read file line by line
+            while ((line = br.readLine()) != null) {
+
+                // split the line by :
+                String[] parts = line.split(",");
+
+                // first part is device, second is url
+                String device = parts[0].trim();
+                String url = parts[1].trim();
+
+                // put device, url in HashMap if they are
+                // not empty
+                if (!device.equals("") && !url.equals(""))
+                    map.put(device, url);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+
+            // Always close the BufferedReader
+            if (br != null) {
+                try {
+                    br.close();
+                }
+                catch (Exception e) {
+                };
+            }
+        }
+
+        return map;
     }
 }

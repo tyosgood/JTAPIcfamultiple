@@ -19,8 +19,15 @@ package com.cisco.jtapi.superProvider_deviceStateServer;
 
 import javax.telephony.*;
 import javax.telephony.events.*;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+
 import com.cisco.jtapi.extensions.*;
 import com.cisco.cti.util.Condition;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.*;
 
 public class Handler implements
 
@@ -28,6 +35,8 @@ public class Handler implements
 
     public Condition providerInService = new Condition();
     public Condition phoneTerminalInService = new Condition();
+
+    public Map <String, String> devices = new HashMap<String, String>();
 
     public void providerChangedEvent(ProvEv[] events) {
         for (ProvEv ev : events) {
@@ -42,27 +51,52 @@ public class Handler implements
 
     public void terminalChangedEvent(TermEv[] events) {
         for (TermEv ev : events) {
-            System.out.println("    Received--> Terminal/"+ev);
+            //System.out.println("    Received--> Terminal/"+ev);
+            //System.out.println("        From Device:"+ ev.getTerminal());
             switch (ev.getID()) {
                 case CiscoTermInServiceEv.ID:
                     phoneTerminalInService.set();
                     break;
                 case CiscoTermDeviceStateIdleEv.ID:
-                    System.out.println("    DEVICE STATE--> "+superProvider_deviceStateServer.stateName.get(CiscoTerminal.DEVICESTATE_IDLE));
+                    System.out.println("    "+ev.getTerminal()+" STATE--> "+superProvider_deviceStateServer.stateName.get(CiscoTerminal.DEVICESTATE_IDLE) + "--> Light off @ " +superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()));
+                    lightAction("idle",superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()) );
                     break;
                 case CiscoTermDeviceStateActiveEv.ID:
-                    System.out.println("    DEVICE STATE--> "+superProvider_deviceStateServer.stateName.get(CiscoTerminal.DEVICESTATE_ACTIVE));
+                    System.out.println("    "+ev.getTerminal()+" STATE--> "+superProvider_deviceStateServer.stateName.get(CiscoTerminal.DEVICESTATE_ACTIVE)+ "--> Light on @ " +superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()));
+                    lightAction("active",superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()) );
                     break;
                 case CiscoTermDeviceStateAlertingEv.ID:
-                    System.out.println("    DEVICE STATE--> "+superProvider_deviceStateServer.stateName.get(CiscoTerminal.DEVICESTATE_ALERTING));
+                    System.out.println("    "+ev.getTerminal()+" STATE--> "+superProvider_deviceStateServer.stateName.get(CiscoTerminal.DEVICESTATE_ALERTING)+ "--> Light flashing at .5 sec @ " +superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()));
+                    lightAction("alerting",superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()) );
                     break;
                 case CiscoTermDeviceStateHeldEv.ID:
-                    System.out.println("    DEVICE STATE--> "+superProvider_deviceStateServer.stateName.get(CiscoTerminal.DEVICESTATE_HELD));
+                    System.out.println("    "+ev.getTerminal()+" STATE--> "+superProvider_deviceStateServer.stateName.get(CiscoTerminal.DEVICESTATE_HELD)+ "--> Light flashing at 1.5 sec @ " +superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()));
+                    lightAction("held",superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()) );
                     break;
                 case CiscoTermDeviceStateWhisperEv.ID:
-                    System.out.println("    DEVICE STATE--> "+superProvider_deviceStateServer.stateName.get(CiscoTerminal.DEVICESTATE_WHISPER));
+                    System.out.println("    "+ev.getTerminal()+" STATE--> "+superProvider_deviceStateServer.stateName.get(CiscoTerminal.DEVICESTATE_WHISPER));
                     break;            }
         }
+    }
+
+    public void lightAction(String action, String URL){
+        
+        HttpClient client = HttpClient.newHttpClient();
+
+        URI myUri = URI.create(URL+action);
+
+        HttpRequest request = HttpRequest.newBuilder(myUri).build();
+
+        //try {
+            CompletableFuture response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+            //System.out.println(response.body());
+        //} catch (IOException e) {
+            // TODO Auto-generated catch block
+       //     e.printStackTrace();
+       // } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+      //      e.printStackTrace();
+      //  }
     }
 
 }
