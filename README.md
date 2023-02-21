@@ -1,24 +1,15 @@
-# jtapi-samples
+# JTAPI Light Control
 
 ## Overview
 
-Sample Java programs demonstrating usage of the Cisco JTAPI API for call control.
+Proof of concept using JTAPI to monitor the state of CUCM registered devices and trigger a lamp based on the state of the device.
+
+The program reads the contents of a CSV file with the device names and the cooresponding smart relay URL and then monitors those devices
+
+Based off DevNet JTAPI sample - `superProvider_deviceStateServer` - Demonstrates using CiscoProvider.createTerminal() to dynamically create a terminal by device name using the 'Superprovider' feature, then retrieves and monitors the device for device-side status changes using the 'Device State Server' feature.
 
 Visit the [DevNet JTAPI Site](https://developer.cisco.com/site/jtapi)
 
-## Available samples
-
-- `makeCall` - basic make-call example.
-
-- `sendData` - Opens a phone and performs a CiscoTerminal.sendData() request to send an [IP Phone Services](https://developer.cisco.com/site/ip-phone-services/) 'Hello World' message to the phone's display.
-
-- `superProvider_deviceStateServer` - Demonstrates using CiscoProvider.createTerminal() to dynamically create a terminal by device name using the 'Superprovider' feature, then retrieves and monitors the device for device-side status changes using the 'Device State Server' feature.
-
-- `dialViaOffice` - Implements a 'dial via office' senario, where a phone calls a CTI Route Point, which makes a new outbound call to a target DN, and then redirects both calls to a CTI Port which transfers the two calls together.
-
-- `conference` - Implements a 3-way ad hoc conference scenario.
-
-- `playmedia` - Answer an inbound call on a CTI Port, then play an audio file using the [gstreamer-java](https://github.com/gstreamer-java/gst1-java-core) framework (see [GStreamer Downloads](https://gstreamer.freedesktop.org/download/) to install - present by default in Ubuntu Linux.)
 
 ## Requirements
 
@@ -32,21 +23,15 @@ Visit the [DevNet JTAPI Site](https://developer.cisco.com/site/jtapi)
 
     - An CUCM application-user or end-user username/password, with the following roles:
 
-        - `Standard CTI Allow Control of Phones supporting Connected Xfer and conf`
-
-        - `Standard CTI Allow Control of Phones supporting Rollover Mode`
-
         - `Standard CTI Enabled`
 
         - `Standard CTI Allow Control of all Devices`
-
-    - One (or three, to try all sample scenarios) [CTI supported phone devices](https://developer.cisco.com/site/jtapi/documents/cti-tapi-jtapi-supported-device-matrix/) (includes Cisco IP Communicator and Jabber soft phones), each configured with one directory number, each associated to the CUCM user.
-
-        >Note, ensure directory numbers have `Allow Control of Device from CTI` enabled
+- Shelly smart plug / relay - see https://shelly.cloud
 
 **Tested With:**
 
 * Ubuntu 22.04
+* Windows 10
 * OpenJDK 8 / 11
 * Maven 3.6.3
 * CUCM 11.5 / 12.5 / 14
