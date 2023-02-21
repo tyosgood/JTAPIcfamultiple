@@ -36,9 +36,7 @@ public class Handler implements
     public Condition providerInService = new Condition();
     public Condition phoneTerminalInService = new Condition();
 
-    public Map <String, String> devices = new HashMap<String, String>();
-
-    public void providerChangedEvent(ProvEv[] events) {
+     public void providerChangedEvent(ProvEv[] events) {
         for (ProvEv ev : events) {
             System.out.println("    Received--> Provider/" + ev);
             switch (ev.getID()) {
@@ -51,8 +49,8 @@ public class Handler implements
 
     public void terminalChangedEvent(TermEv[] events) {
         for (TermEv ev : events) {
-            //System.out.println("    Received--> Terminal/"+ev);
-            //System.out.println("        From Device:"+ ev.getTerminal());
+           // System.out.println("    Received--> Terminal/"+ev.toString());
+           // System.out.println("        From Device:"+ ev.getTerminal().getName());
             switch (ev.getID()) {
                 case CiscoTermInServiceEv.ID:
                     phoneTerminalInService.set();
