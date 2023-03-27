@@ -36,7 +36,7 @@
             "type": "java",
             "name": "Launch superProvider_deviceStateServer",
             "request": "launch",
-            "mainClass": "com.cisco.jtapi.superProvider_deviceStateServer.superProvider_deviceStateServer",
+            "mainClass": "com.cisco.jtapi.lightControl.superProvider_deviceStateServer",
             "projectName": "jtapi-samples"
         },
         {

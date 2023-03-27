@@ -1,6 +1,6 @@
-package com.cisco.jtapi.superProvider_deviceStateServer;
+package com.cisco.jtapi.lightControl;
 
-// Copyright (c) 2020 Cisco and/or its affiliates.
+// Copyright (c) 2023 Cisco and/or its affiliates.
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
@@ -19,19 +19,13 @@ package com.cisco.jtapi.superProvider_deviceStateServer;
 
 import javax.telephony.*;
 import javax.telephony.events.*;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-
 import com.cisco.jtapi.extensions.*;
 import com.cisco.cti.util.Condition;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.*;
 
-public class Handler implements
 
-        ProviderObserver, TerminalObserver {
+
+public class Handler implements ProviderObserver, TerminalObserver {
 
     public Condition providerInService = new Condition();
     public Condition phoneTerminalInService = new Condition();
@@ -49,52 +43,31 @@ public class Handler implements
 
     public void terminalChangedEvent(TermEv[] events) {
         for (TermEv ev : events) {
-           // System.out.println("    Received--> Terminal/"+ev.toString());
-           // System.out.println("        From Device:"+ ev.getTerminal().getName());
+           //in the following cases change out "cyberData" to "shelly" to utilize the Shelly smart relays and vice versa
             switch (ev.getID()) {
                 case CiscoTermInServiceEv.ID:
                     phoneTerminalInService.set();
                     break;
                 case CiscoTermDeviceStateIdleEv.ID:
                     System.out.println("    "+ev.getTerminal()+" STATE--> "+superProvider_deviceStateServer.stateName.get(CiscoTerminal.DEVICESTATE_IDLE) + "--> Light off @ " +superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()));
-                    lightAction("idle",superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()) );
+                    cyberData.lightAction("idle",superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()) );
                     break;
                 case CiscoTermDeviceStateActiveEv.ID:
                     System.out.println("    "+ev.getTerminal()+" STATE--> "+superProvider_deviceStateServer.stateName.get(CiscoTerminal.DEVICESTATE_ACTIVE)+ "--> Light on @ " +superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()));
-                    lightAction("active",superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()) );
+                    cyberData.lightAction("active",superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()) );
                     break;
                 case CiscoTermDeviceStateAlertingEv.ID:
                     System.out.println("    "+ev.getTerminal()+" STATE--> "+superProvider_deviceStateServer.stateName.get(CiscoTerminal.DEVICESTATE_ALERTING)+ "--> Light flashing at .5 sec @ " +superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()));
-                    lightAction("alerting",superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()) );
+                    cyberData.lightAction("alerting",superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()) );
                     break;
                 case CiscoTermDeviceStateHeldEv.ID:
                     System.out.println("    "+ev.getTerminal()+" STATE--> "+superProvider_deviceStateServer.stateName.get(CiscoTerminal.DEVICESTATE_HELD)+ "--> Light flashing at 1.5 sec @ " +superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()));
-                    lightAction("held",superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()) );
+                    cyberData.lightAction("held",superProvider_deviceStateServer.deviceList.get(ev.getTerminal().toString()) );
                     break;
                 case CiscoTermDeviceStateWhisperEv.ID:
                     System.out.println("    "+ev.getTerminal()+" STATE--> "+superProvider_deviceStateServer.stateName.get(CiscoTerminal.DEVICESTATE_WHISPER));
-                    break;            }
+                    break;         
+                }
         }
     }
-
-    public void lightAction(String action, String URL){
-        
-        HttpClient client = HttpClient.newHttpClient();
-
-        URI myUri = URI.create(URL+action);
-
-        HttpRequest request = HttpRequest.newBuilder(myUri).build();
-
-        //try {
-            CompletableFuture response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
-            //System.out.println(response.body());
-        //} catch (IOException e) {
-            // TODO Auto-generated catch block
-       //     e.printStackTrace();
-       // } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-      //      e.printStackTrace();
-      //  }
-    }
-
 }
