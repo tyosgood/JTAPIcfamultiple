@@ -4,7 +4,7 @@
 
 Proof of concept using JTAPI to monitor the state of CUCM registered devices and trigger a lamp based on the state of the device.
 
-The program reads the contents of a CSV file with the device names and the cooresponding smart relay URL and then monitors those devices
+The program reads the contents of a CSV file with the device names and the cooresponding smart device URL and then monitors those devices. With minor code change this solution can work with either the SIP strobe from CyberData or Shelly Plus devices.
 
 Based off DevNet JTAPI sample - `superProvider_deviceStateServer` - Demonstrates using CiscoProvider.createTerminal() to dynamically create a terminal by device name using the 'Superprovider' feature, then retrieves and monitors the device for device-side status changes using the 'Device State Server' feature.
 
@@ -26,12 +26,12 @@ Visit the [DevNet JTAPI Site](https://developer.cisco.com/site/jtapi)
         - `Standard CTI Enabled`
 
         - `Standard CTI Allow Control of all Devices`
-- Shelly smart plug / relay - see https://shelly.cloud
+- Shelly smart plug / relay - see https://shelly.cloud  or CyberData SIP strobe running v 20-3-0 or higher firmware
 
 **Tested With:**
 
 * Ubuntu 22.04
-* Windows 10
+* Windows 10 / 11
 * OpenJDK 8 / 11
 * Maven 3.6.3
 * CUCM 11.5 / 12.5 / 14
