@@ -31,7 +31,7 @@ Visit the [DevNet JTAPI Site](https://developer.cisco.com/site/jtapi)
 **Tested With:**
 
 * Ubuntu 22.04
-* Windows 10
+* Windows 10 / 11
 * OpenJDK 8 / 11
 * Maven 3.6.3
 * CUCM 11.5 / 12.5 / 14
