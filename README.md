@@ -55,7 +55,7 @@ Visit the [DevNet JTAPI Site](https://developer.cisco.com/site/jtapi)
 1. Open a terminal and use `git` to clone this repository:
 
     ```bash
-    git clone https://github.com/CiscoDevNet/jtapi-samples.git
+    git clone https://github.com/tyosgood/JTAPI-LightControl.git
     ```
 
 1. Open the Java project in [Visual Studio Code](https://code.visualstudio.com/):
