@@ -140,7 +140,7 @@ public class superProvider_deviceStateServer {
         try {
 
             // create file object
-            File file = new File("src/main/java/com/cisco/jtapi/superProvider_deviceStateServer/monitorList.csv");
+            File file = new File("src/main/java/com/cisco/jtapi/lightControl/monitorList.csv");
 
             // create BufferedReader object from the File
             br = new BufferedReader(new FileReader(file));
