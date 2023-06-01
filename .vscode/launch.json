@@ -6,51 +6,9 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Launch playMedia",
+            "name": "Launch CallForward",
             "request": "launch",
-            "mainClass": "com.cisco.jtapi.playmedia.playMedia",
-            "projectName": "jtapi-samples"
-        },
-        {
-            "type": "java",
-            "name": "Launch test",
-            "request": "launch",
-            "mainClass": "com.cisco.jtapi.playmedia.test",
-            "projectName": "jtapi-samples"
-        },
-        {
-            "type": "java",
-            "name": "Launch makeCall",
-            "request": "launch",
-            "mainClass": "com.cisco.jtapi.makecall.makeCall",
-            "projectName": "jtapi-samples"
-        },
-        {
-            "type": "java",
-            "name": "Launch sendData",
-            "request": "launch",
-            "mainClass": "com.cisco.jtapi.sendData.sendData",
-            "projectName": "jtapi-samples"
-        },
-        {
-            "type": "java",
-            "name": "Launch superProvider_deviceStateServer",
-            "request": "launch",
-            "mainClass": "com.cisco.jtapi.lightControl.superProvider_deviceStateServer",
-            "projectName": "jtapi-samples"
-        },
-        {
-            "type": "java",
-            "name": "Launch dialViaOffice",
-            "request": "launch",
-            "mainClass": "com.cisco.jtapi.dialviaoffice.dialViaOffice",
-            "projectName": "jtapi-samples"
-        },
-        {
-            "type": "java",
-            "name": "Launch conference",
-            "request": "launch",
-            "mainClass": "com.cisco.jtapi.conference.conference",
+            "mainClass": "com.cisco.jtapi.cfamultiple.callForward",
             "projectName": "jtapi-samples"
         }
     ]

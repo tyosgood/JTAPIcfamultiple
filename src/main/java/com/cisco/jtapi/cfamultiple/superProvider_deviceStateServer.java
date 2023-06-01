@@ -1,4 +1,4 @@
-package com.cisco.jtapi.lightControl;
+package com.cisco.jtapi.cfamultiple;
 
 // Copyright (c) 2023 Cisco and/or its affiliates.
 // Permission is hereby granted, free of charge, to any person obtaining a copy
