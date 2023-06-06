@@ -30,6 +30,7 @@ public class callForward {
         // Retrieve environment variables from .env, if present
         Dotenv dotenv=Dotenv.load();
 
+        
         // The Handler class provides observers for provider/address/terminal/call events
         Handler handler = new Handler();
 
@@ -50,6 +51,14 @@ public class callForward {
         provider.addObserver(handler);
         handler.providerInService.waitTrue();
 
+        //Create Array list to hold the address objects
+        List<AddressImpl> addressList = new ArrayList<AddressImpl>();
+
+        for (String extension : extensions){
+            log("Creating address for extension: " + extension);
+            addressList.add((AddressImpl) provider.getAddress(extension)); 
+        }       
+
         /* // Open the ALICE_DN Address and wait for it to go in service
         log("Opening fromAddress DN: " + dotenv.get("ALICE_DN"));
         CiscoAddress fromAddress = (CiscoAddress) provider.getAddress(dotenv.get("ALICE_DN"));
@@ -65,26 +74,55 @@ public class callForward {
         fromTerminal.addObserver(handler);
         handler.fromTerminalInService.waitTrue(); */
 
-        for (String extension : extensions){
-            log(extension);
-        }
+       // AddressImpl fwdAddress = null;
 
-        //Try to set a forwarder
-        AddressImpl fwdAddress =  (AddressImpl) provider.getAddress(dotenv.get("ALICE_DN"));
+        //Set up forwarding destination
+        CallControlForwarding[] cforwardIs = new CallControlForwarding[1];
+        cforwardIs[0] = new CallControlForwarding(dotenv.get("TARGET_DN"));
+
+        /* for (String extension : extensions){
+            log(extension);
+        fwdAddress = null;
+
+         //Try to set a forwarder
+        fwdAddress  =  (AddressImpl) provider.getAddress(extension);
         fwdAddress.addObserver(handler);
         handler.fromAddressInService.waitTrue();
 
-        if (fwdAddress.getForwarding() != null) {
-            log ("forwading for "+dotenv.get("ALICE_DN")+ " set to "+ fwdAddress.getForwarding()[0].getDestinationAddress());
+         if (fwdAddress.getForwarding() != null) {
+            log ("forwading for "+extension+ " set to "+ fwdAddress.getForwarding()[0].getDestinationAddress());
             log ("Canceling existing forward");
             fwdAddress.cancelForwarding();
         }
         
-      CallControlForwarding[] cforwardIs = new CallControlForwarding[1];
-      cforwardIs[0] = new CallControlForwarding("2111");
+      
+      
       fwdAddress.setForwarding(cforwardIs);
-      //log ("forwading for "+dotenv.get("ALICE_DN")+ " is now set to "+ fwdAddress.getForwarding()[0].getDestinationAddress());
+      log("Setting cfwdAll for "+ extension +" to 2111");
+      
+    } */
+    for (int i = 0; i < addressList.size(); i++){
+        //add observer for each terminal
+       addressList.get(i).addObserver(handler);
+       
     }
+
+    for (int i = 0; i < addressList.size(); i++){
+        //add observer for each terminal 
+       
+        if (addressList.get(i).getForwarding() != null) {
+            log ("Existing forwading for "+addressList.get(i).getName()+ " set to "+ addressList.get(i).getForwarding()[0].getDestinationAddress());
+            log ("Canceling existing forward");
+            addressList.get(i).cancelForwarding();
+        }
+        log("Setting forwarding for "+addressList.get(i).getName()+ " to "+dotenv.get("TARGET_DN") );
+        addressList.get(i).setForwarding(cforwardIs);
+        
+    }
+          //log ("forwading for "+dotenv.get("ALICE_DN")+ " is now set to "+ fwdAddress.getForwarding()[0].getDestinationAddress());
+          System.exit(0);
+ }
+
     
     public static List<String> readExtensionFile() {
        
