@@ -20,6 +20,7 @@ package com.cisco.jtapi.cfamultiple;
 import javax.telephony.*;
 import javax.telephony.events.*;
 import javax.telephony.callcontrol.*;
+import com.cisco.jtapi.*;
 import com.cisco.jtapi.extensions.*;
 import com.cisco.cti.util.Condition;
 
@@ -27,7 +28,10 @@ public class Handler implements
 
         ProviderObserver, TerminalObserver, AddressObserver, CallControlCallObserver {
 
-    public Condition providerInService = new Condition();
+   
+    
+    
+            public Condition providerInService = new Condition();
     public Condition fromTerminalInService = new Condition();
     public Condition fromAddressInService = new Condition();
     public Condition callActive = new Condition();
@@ -50,6 +54,8 @@ public class Handler implements
                 case CiscoTermInServiceEv.ID:
                     fromTerminalInService.set();
                     break;
+                
+
             }
         }
     }
@@ -66,16 +72,78 @@ public class Handler implements
     }
 
     public void callChangedEvent(CallEv[] events) {
+         //Set up forwarding destination
+    
         for (CallEv ev : events) {
-            System.out.println("    Received--> Call/"+ev);
+            //System.out.println("    Received--> Call/"+ev);
+            if (ev instanceof TermConnActiveEv){
+                CiscoCall thisCall  =  (CiscoCall) ev.getCall();
+                int cfaStatus  =  thisCall.getCFwdAllKeyPressIndicator();
+                if (cfaStatus == CiscoCall.CFWD_ALL_SET ){
+                   System.out.println("Call is created due to CallFwdAll -- SET soft key press");
+                   setForwards();
+                }else if (cfaStatus == CiscoCall.CFWD_ALL_CLEAR) {
+                    System.out.println("Call is created due to CallFwdAll -- CLEAR soft key press");
+                    clearForwards();
+
+                }else{System.out.println("Call is NOT created due to CallFwdAll soft key press");
+                }
+             }
+            
             switch (ev.getID()) {
                 case CallActiveEv.ID:
                     callActive.set();
                     break;
+            
+                
             }
         }
 
     }
 
-  
+    public void clearForwards(){
+        for (int i = 0; i < callForward.addressList.size(); i++){
+            //add observer for each terminal 
+           
+            try {
+                if (callForward.addressList.get(i).getForwarding() != null) {
+                    System.out.println("Canceling existing forwading for "+callForward.addressList.get(i).getName()+ " set to "+ callForward.addressList.get(i).getForwarding()[0].getDestinationAddress());
+                    callForward.addressList.get(i).cancelForwarding();
+                }
+            } catch (MethodNotSupportedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (InvalidStateException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void setForwards(){
+        CallControlForwarding[] cforwardIs = new CallControlForwarding[1];
+        cforwardIs[0] = new CallControlForwarding(callForward.targetDN);
+            for (int i = 0; i < callForward.addressList.size(); i++){
+                //add observer for each terminal 
+                                    
+                System.out.println("Setting forwarding for "+callForward.addressList.get(i).getName()+ " to "+callForward.targetDN );
+                try {
+                    callForward.addressList.get(i).setForwarding(cforwardIs);
+                } catch (MethodNotSupportedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (InvalidStateException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (InvalidArgumentException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                
+                    }
+
+    }
+
 }
+
+ 

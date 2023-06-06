@@ -21,6 +21,11 @@ public class callForward {
     }
 
     public static List<String> extensions = readExtensionFile();
+    //Create Array list to hold the address objects
+    public static List<AddressImpl> addressList = new ArrayList<AddressImpl>();
+
+    public static String targetDN = "2111";
+    
 
     public static void main(String[] args) throws
 
@@ -29,6 +34,7 @@ public class callForward {
 
         // Retrieve environment variables from .env, if present
         Dotenv dotenv=Dotenv.load();
+        
 
         
         // The Handler class provides observers for provider/address/terminal/call events
@@ -51,8 +57,7 @@ public class callForward {
         provider.addObserver(handler);
         handler.providerInService.waitTrue();
 
-        //Create Array list to hold the address objects
-        List<AddressImpl> addressList = new ArrayList<AddressImpl>();
+        
 
         for (String extension : extensions){
             log("Creating address for extension: " + extension);
@@ -68,17 +73,32 @@ public class callForward {
         // Add a call observer to receive call events
         fromAddress.addCallObserver(handler);
         // Get/open the first Terminal for the Address.  Could be multiple
-        //   if it's a shared line
-        CiscoTerminal fromTerminal = (CiscoTerminal) fromAddress.getTerminals()[0];
+        //   if it's a shared line*/
+        CiscoTerminal fromTerminal = (CiscoTerminal) provider.createTerminal("SEP28DFEBB58EE8");
         log("Awaiting CiscoTermInServiceEv for: " + fromTerminal.getName() + "...");
         fromTerminal.addObserver(handler);
-        handler.fromTerminalInService.waitTrue(); */
+        handler.fromTerminalInService.waitTrue(); 
+        
+        CiscoTermEvFilter termFilter = fromTerminal.getFilter();
+
+        termFilter.setButtonPressedEnabled(true);
+
+        termFilter.setDeviceStateIdleEvFilter(true);
+        termFilter.setDeviceStateActiveEvFilter(true);
+        termFilter.setDeviceStateAlertingEvFilter(true);
+        termFilter.setDeviceStateHeldEvFilter(true);
+        termFilter.setDeviceStateWhisperEvFilter(false); 
+
+        fromTerminal.setFilter(termFilter);
+
+        //log terminal montior
+        log("Monitoring state changes for: "+fromTerminal.getName()+"...");
 
        // AddressImpl fwdAddress = null;
 
         //Set up forwarding destination
-        CallControlForwarding[] cforwardIs = new CallControlForwarding[1];
-        cforwardIs[0] = new CallControlForwarding(dotenv.get("TARGET_DN"));
+    //CallControlForwarding[] cforwardIs = new CallControlForwarding[1];
+    //cforwardIs[0] = new CallControlForwarding(targetDN);
 
         /* for (String extension : extensions){
             log(extension);
@@ -104,23 +124,14 @@ public class callForward {
     for (int i = 0; i < addressList.size(); i++){
         //add observer for each terminal
        addressList.get(i).addObserver(handler);
-       
+       addressList.get(i).addCallObserver(handler);
+
+     
     }
 
-    for (int i = 0; i < addressList.size(); i++){
-        //add observer for each terminal 
-       
-        if (addressList.get(i).getForwarding() != null) {
-            log ("Existing forwading for "+addressList.get(i).getName()+ " set to "+ addressList.get(i).getForwarding()[0].getDestinationAddress());
-            log ("Canceling existing forward");
-            addressList.get(i).cancelForwarding();
-        }
-        log("Setting forwarding for "+addressList.get(i).getName()+ " to "+dotenv.get("TARGET_DN") );
-        addressList.get(i).setForwarding(cforwardIs);
-        
-    }
+    
           //log ("forwading for "+dotenv.get("ALICE_DN")+ " is now set to "+ fwdAddress.getForwarding()[0].getDestinationAddress());
-          System.exit(0);
+          //System.exit(0);
  }
 
     
