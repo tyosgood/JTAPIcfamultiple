@@ -10,8 +10,11 @@ import javax.telephony.callcontrol.*;
 import com.cisco.jtapi.*;
 import com.cisco.jtapi.extensions.*;
 
+import static spark.Spark.*;
+
 
 import io.github.cdimascio.dotenv.Dotenv;
+import spark.Response;
 
 public class callForward {
     private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss.SS"); 
@@ -24,7 +27,7 @@ public class callForward {
     //Create Array list to hold the address objects
     public static List<AddressImpl> addressList = new ArrayList<AddressImpl>();
 
-    public static String targetDN = "2111";
+    public static String targetDN = "";
     
 
     public static void main(String[] args) throws
@@ -34,11 +37,59 @@ public class callForward {
 
         // Retrieve environment variables from .env, if present
         Dotenv dotenv=Dotenv.load();
-        
 
-        
         // The Handler class provides observers for provider/address/terminal/call events
         Handler handler = new Handler();
+
+        get("/setCFwdALL", (req, res) -> {
+            log("User entered "+ req.queryParams("target"));
+            targetDN = req.queryParams("target");
+            
+            return handler.setForwards();
+        });
+            //return ("Setting Call Forwards to "+targetDN); });
+
+        get("/unsetCFwdALL", (req, res) -> {
+            handler.clearForwards();
+            return ("Unsetting Call Forwards");
+                });
+        
+         get("/test", (req, res) -> {
+                    res.type("text/xml; charset=ISO-8859-1");
+                    log(req.ip());
+                    log(req.userAgent());
+
+                    //return ("<CiscoIPPhoneMenu><Title>Call Forward Multiple</Title><Prompt></Prompt><MenuItem><Name>Set Call Forwards</Name><URL>http://localhost:4567/setCFwdALL</URL></MenuItem><MenuItem><Name>UnSet Call Forwards</Name><URL>http://localhost:4567/unsetCFwdALL</URL></MenuItem></CiscoIPPhoneMenu>"); });
+                    return("<CiscoIPPhoneInput>"
+                              +"<Title>Set Call Forwards</Title>"
+                                    +"<Prompt>Enter number</Prompt>"
+                                        +"<URL>http://localhost:4567/setCFwdALL</URL>"
+                                        +"<InputItem>"
+                                            +"<DisplayName>Number</DisplayName>"
+                                            +"<QueryStringParam>target</QueryStringParam>"
+                                            +"<DefaultValue>"+targetDN+"</DefaultValue>"
+                                            +"<InputFlags>T</InputFlags>"
+                                        +"</InputItem>"
+                                        +"<SoftKeyItem>"
+                                            +"<Name>Fwd</Name>"
+                                            +"<URL>SoftKey:Submit</URL>"
+                                            +"<Position>1</Position>"
+                                        +"</SoftKeyItem>"
+                                        +"<SoftKeyItem>"
+                                            +"<Name>Un-Fwd</Name>"
+                                            +"<URL>http://localhost:4567/unsetCFwdALL</URL>"
+                                            +"<Position>2</Position>"
+                                        +"</SoftKeyItem>"
+                                        +"<SoftKeyItem>"
+                                            +"<Name>Bksp</Name>"
+                                            +"<URL>SoftKey:&lt;&lt;</URL>"
+                                            +"<Position>3</Position>"
+                                        +"</SoftKeyItem>"
+                            +"</CiscoIPPhoneInput>");
+                        });
+                    
+                  
+        
 
         // Create the JtapiPeer object, representing the JTAPI library
         log("Initializing Jtapi");

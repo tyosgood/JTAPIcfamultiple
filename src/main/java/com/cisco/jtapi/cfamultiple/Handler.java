@@ -76,7 +76,7 @@ public class Handler implements
     
         for (CallEv ev : events) {
             
-            if (ev instanceof TermConnActiveEv){
+           /*  if (ev instanceof TermConnActiveEv){
                 System.out.println("    Received--> Call/"+ev);
                 CiscoCall thisCall  =  (CiscoCall) ev.getCall();
                 int cfaStatus  =  thisCall.getCFwdAllKeyPressIndicator();
@@ -89,7 +89,7 @@ public class Handler implements
 
                 }else{System.out.println("Call is NOT created due to CallFwdAll soft key press");
                 }
-             }
+             } */
             
             switch (ev.getID()) {
                 case CallActiveEv.ID:
@@ -100,10 +100,10 @@ public class Handler implements
             }
         }
 
-    }
+    } 
 
     public void clearForwards(){
-        for (int i = 1; i < callForward.addressList.size(); i++){
+        for (int i = 0; i < callForward.addressList.size(); i++){
             //add observer for each terminal 
             System.out.println("Working on "+callForward.addressList.get(i).getName());
             try {
@@ -121,7 +121,7 @@ public class Handler implements
         }
     }
 
-    public void setForwards(){
+    public String setForwards(){
         CallControlForwarding[] cforwardIs = new CallControlForwarding[1];
         cforwardIs[0] = new CallControlForwarding(callForward.targetDN);
 
@@ -138,13 +138,15 @@ public class Handler implements
                 } catch (InvalidStateException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
+                    System.out.println(e.getMessage());
+                    return "Error: "+e.getMessage();
                 } catch (InvalidArgumentException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 
                     }
-
+            return " Success: forwards set to " +callForward.targetDN;
     }
 
 }
