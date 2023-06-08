@@ -31,7 +31,7 @@ public class Handler implements
    
     
     
-            public Condition providerInService = new Condition();
+    public Condition providerInService = new Condition();
     public Condition fromTerminalInService = new Condition();
     public Condition fromAddressInService = new Condition();
     public Condition callActive = new Condition();
@@ -75,8 +75,9 @@ public class Handler implements
          //Set up forwarding destination
     
         for (CallEv ev : events) {
-            //System.out.println("    Received--> Call/"+ev);
+            
             if (ev instanceof TermConnActiveEv){
+                System.out.println("    Received--> Call/"+ev);
                 CiscoCall thisCall  =  (CiscoCall) ev.getCall();
                 int cfaStatus  =  thisCall.getCFwdAllKeyPressIndicator();
                 if (cfaStatus == CiscoCall.CFWD_ALL_SET ){
@@ -102,9 +103,9 @@ public class Handler implements
     }
 
     public void clearForwards(){
-        for (int i = 0; i < callForward.addressList.size(); i++){
+        for (int i = 1; i < callForward.addressList.size(); i++){
             //add observer for each terminal 
-           
+            System.out.println("Working on "+callForward.addressList.get(i).getName());
             try {
                 if (callForward.addressList.get(i).getForwarding() != null) {
                     System.out.println("Canceling existing forwading for "+callForward.addressList.get(i).getName()+ " set to "+ callForward.addressList.get(i).getForwarding()[0].getDestinationAddress());
@@ -123,6 +124,8 @@ public class Handler implements
     public void setForwards(){
         CallControlForwarding[] cforwardIs = new CallControlForwarding[1];
         cforwardIs[0] = new CallControlForwarding(callForward.targetDN);
+
+            //need to start on the second forwarded DN because the first gets canceled automatically when user presses CFwdALL
             for (int i = 0; i < callForward.addressList.size(); i++){
                 //add observer for each terminal 
                                     

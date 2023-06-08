@@ -64,16 +64,7 @@ public class callForward {
             addressList.add((AddressImpl) provider.getAddress(extension)); 
         }       
 
-        /* // Open the ALICE_DN Address and wait for it to go in service
-        log("Opening fromAddress DN: " + dotenv.get("ALICE_DN"));
-        CiscoAddress fromAddress = (CiscoAddress) provider.getAddress(dotenv.get("ALICE_DN"));
-        log("Awaiting CiscoAddrInServiceEv for: " + fromAddress.getName() + "...");
-        fromAddress.addObserver(handler);
-        handler.fromAddressInService.waitTrue();
-        // Add a call observer to receive call events
-        fromAddress.addCallObserver(handler);
-        // Get/open the first Terminal for the Address.  Could be multiple
-        //   if it's a shared line*/
+    
         CiscoTerminal fromTerminal = (CiscoTerminal) provider.createTerminal("SEP28DFEBB58EE8");
         log("Awaiting CiscoTermInServiceEv for: " + fromTerminal.getName() + "...");
         fromTerminal.addObserver(handler);
@@ -94,33 +85,7 @@ public class callForward {
         //log terminal montior
         log("Monitoring state changes for: "+fromTerminal.getName()+"...");
 
-       // AddressImpl fwdAddress = null;
 
-        //Set up forwarding destination
-    //CallControlForwarding[] cforwardIs = new CallControlForwarding[1];
-    //cforwardIs[0] = new CallControlForwarding(targetDN);
-
-        /* for (String extension : extensions){
-            log(extension);
-        fwdAddress = null;
-
-         //Try to set a forwarder
-        fwdAddress  =  (AddressImpl) provider.getAddress(extension);
-        fwdAddress.addObserver(handler);
-        handler.fromAddressInService.waitTrue();
-
-         if (fwdAddress.getForwarding() != null) {
-            log ("forwading for "+extension+ " set to "+ fwdAddress.getForwarding()[0].getDestinationAddress());
-            log ("Canceling existing forward");
-            fwdAddress.cancelForwarding();
-        }
-        
-      
-      
-      fwdAddress.setForwarding(cforwardIs);
-      log("Setting cfwdAll for "+ extension +" to 2111");
-      
-    } */
     for (int i = 0; i < addressList.size(); i++){
         //add observer for each terminal
        addressList.get(i).addObserver(handler);
@@ -128,10 +93,7 @@ public class callForward {
 
      
     }
-
-    
-          //log ("forwading for "+dotenv.get("ALICE_DN")+ " is now set to "+ fwdAddress.getForwarding()[0].getDestinationAddress());
-          //System.exit(0);
+        
  }
 
     
