@@ -8,6 +8,8 @@ The program reads the contents of a CSV file (extensionList.csv) with the extens
 
 This functions independently of the CFwdALL button on the phone, but if the the primary line on the phone is in the list of extensions to be forwarded, pressing the CFwdALL softkey will cancel the forwarding only on the primary line. In this scenario, all the other lines in the list would stay forwarded, but there would be no visual indication on the phone.
 
+Video demo here: https://app.vidcast.io/share/6cd521a4-4a3f-47b7-9e43-8550d45a77e3
+
 
 
 Visit the [DevNet JTAPI Site](https://developer.cisco.com/site/jtapi)
