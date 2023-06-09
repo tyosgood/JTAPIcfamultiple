@@ -6,7 +6,6 @@ import java.util.*;
 import java.io.*;  
 
 import javax.telephony.*;
-import javax.telephony.callcontrol.*;
 import com.cisco.jtapi.*;
 import com.cisco.jtapi.extensions.*;
 
@@ -14,7 +13,7 @@ import static spark.Spark.*;
 
 
 import io.github.cdimascio.dotenv.Dotenv;
-import spark.Response;
+
 
 public class callForward {
     private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss.SS"); 
@@ -27,7 +26,10 @@ public class callForward {
     //Create Array list to hold the address objects
     public static List<AddressImpl> addressList = new ArrayList<AddressImpl>();
 
+    //need to decalre so we can display
     public static String targetDN = "";
+    
+    
     
 
     public static void main(String[] args) throws
@@ -38,55 +40,68 @@ public class callForward {
         // Retrieve environment variables from .env, if present
         Dotenv dotenv=Dotenv.load();
 
+        //change this to dynamically grab the IP of the host container
+        final String serverIP = "localhost";
+
+        //4567 is default for the SparkJava server, change here to use different;
+        final String serverPort = "4567";
+        port(Integer.parseInt(serverPort));
+
         // The Handler class provides observers for provider/address/terminal/call events
         Handler handler = new Handler();
 
+        
+        //Web paths for the IP phone service
         get("/setCFwdALL", (req, res) -> {
             log("User entered "+ req.queryParams("target"));
             targetDN = req.queryParams("target");
             
             return handler.setForwards();
         });
-            //return ("Setting Call Forwards to "+targetDN); });
+            
 
         get("/unsetCFwdALL", (req, res) -> {
             handler.clearForwards();
             return ("Unsetting Call Forwards");
                 });
         
-         get("/test", (req, res) -> {
-                    res.type("text/xml; charset=ISO-8859-1");
-                    log(req.ip());
-                    log(req.userAgent());
+         get("/cfaMultiple", (req, res) -> {
+            res.type("text/xml; charset=ISO-8859-1");
+            log(req.ip());
+            log(req.userAgent());
 
-                    //return ("<CiscoIPPhoneMenu><Title>Call Forward Multiple</Title><Prompt></Prompt><MenuItem><Name>Set Call Forwards</Name><URL>http://localhost:4567/setCFwdALL</URL></MenuItem><MenuItem><Name>UnSet Call Forwards</Name><URL>http://localhost:4567/unsetCFwdALL</URL></MenuItem></CiscoIPPhoneMenu>"); });
-                    return("<CiscoIPPhoneInput>"
-                              +"<Title>Set Call Forwards</Title>"
-                                    +"<Prompt>Enter number</Prompt>"
-                                        +"<URL>http://localhost:4567/setCFwdALL</URL>"
-                                        +"<InputItem>"
-                                            +"<DisplayName>Number</DisplayName>"
-                                            +"<QueryStringParam>target</QueryStringParam>"
-                                            +"<DefaultValue>"+targetDN+"</DefaultValue>"
-                                            +"<InputFlags>T</InputFlags>"
-                                        +"</InputItem>"
-                                        +"<SoftKeyItem>"
-                                            +"<Name>Fwd</Name>"
-                                            +"<URL>SoftKey:Submit</URL>"
-                                            +"<Position>1</Position>"
-                                        +"</SoftKeyItem>"
-                                        +"<SoftKeyItem>"
-                                            +"<Name>Un-Fwd</Name>"
-                                            +"<URL>http://localhost:4567/unsetCFwdALL</URL>"
-                                            +"<Position>2</Position>"
-                                        +"</SoftKeyItem>"
-                                        +"<SoftKeyItem>"
-                                            +"<Name>Bksp</Name>"
-                                            +"<URL>SoftKey:&lt;&lt;</URL>"
-                                            +"<Position>3</Position>"
-                                        +"</SoftKeyItem>"
-                            +"</CiscoIPPhoneInput>");
-                        });
+            return("<CiscoIPPhoneInput>"
+                        +"<Title>Set Call Forwards</Title>"
+                            +"<Prompt>Enter number</Prompt>"
+                                +"<URL>http://"+serverIP+":"+serverPort+"/setCFwdALL</URL>"
+                                +"<InputItem>"
+                                    +"<DisplayName>Number</DisplayName>"
+                                    +"<QueryStringParam>target</QueryStringParam>"
+                                    +"<DefaultValue>"+targetDN+"</DefaultValue>"
+                                    +"<InputFlags>T</InputFlags>"
+                                +"</InputItem>"
+                                +"<SoftKeyItem>"
+                                    +"<Name>Fwd</Name>"
+                                    +"<URL>SoftKey:Submit</URL>"
+                                    +"<Position>1</Position>"
+                                +"</SoftKeyItem>"
+                                +"<SoftKeyItem>"
+                                    +"<Name>Un-Fwd</Name>"
+                                    +"<URL>http://"+serverIP+":"+serverPort+"/unsetCFwdALL</URL>"
+                                    +"<Position>2</Position>"
+                                +"</SoftKeyItem>"
+                                +"<SoftKeyItem>"
+                                    +"<Name>Bksp</Name>"
+                                    +"<URL>SoftKey:&lt;&lt;</URL>"
+                                    +"<Position>3</Position>"
+                                +"</SoftKeyItem>"
+                                +"<SoftKeyItem>"
+                                    +"<Name>Exit</Name>"
+                                    +"<URL>SoftKey:Exit</URL>"
+                                    +"<Position>4</Position>"
+                                +"</SoftKeyItem>"
+                    +"</CiscoIPPhoneInput>");
+         });
                     
                   
         
@@ -115,32 +130,12 @@ public class callForward {
             addressList.add((AddressImpl) provider.getAddress(extension)); 
         }       
 
-    
-        CiscoTerminal fromTerminal = (CiscoTerminal) provider.createTerminal("SEP28DFEBB58EE8");
-        log("Awaiting CiscoTermInServiceEv for: " + fromTerminal.getName() + "...");
-        fromTerminal.addObserver(handler);
-        handler.fromTerminalInService.waitTrue(); 
-        
-        CiscoTermEvFilter termFilter = fromTerminal.getFilter();
+         
 
-        termFilter.setButtonPressedEnabled(true);
-
-        termFilter.setDeviceStateIdleEvFilter(true);
-        termFilter.setDeviceStateActiveEvFilter(true);
-        termFilter.setDeviceStateAlertingEvFilter(true);
-        termFilter.setDeviceStateHeldEvFilter(true);
-        termFilter.setDeviceStateWhisperEvFilter(false); 
-
-        fromTerminal.setFilter(termFilter);
-
-        //log terminal montior
-        log("Monitoring state changes for: "+fromTerminal.getName()+"...");
-
-
-    for (int i = 0; i < addressList.size(); i++){
-        //add observer for each terminal
-       addressList.get(i).addObserver(handler);
-       addressList.get(i).addCallObserver(handler);
+        for (int i = 0; i < addressList.size(); i++){
+            //add observer for each DN in list
+            addressList.get(i).addObserver(handler);
+            addressList.get(i).addCallObserver(handler);
 
      
     }

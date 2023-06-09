@@ -145,8 +145,8 @@ public class Handler implements
                     e.printStackTrace();
                 }
                 
-                    }
-            return " Success: forwards set to " +callForward.targetDN;
+            }
+        return " Success: forwards set to " +callForward.targetDN;
     }
 
 }

@@ -2,11 +2,13 @@
 
 ## Overview
 
-Proof of concept using JTAPI to monitor the state of CUCM registered devices and trigger a lamp based on the state of the device.
+Proof of concept using JTAPI and an IP Phone Service to allow a user to easily forward multiple lines from their phone.
 
-The program reads the contents of a CSV file with the device names and the cooresponding smart device URL and then monitors those devices. With minor code change this solution can work with either the SIP strobe from CyberData or Shelly Plus devices.
+The program reads the contents of a CSV file (extensionList.csv) with the extensions to be forwarded. The user then initiates the forward from an IP phone service on their phone - that service must be defined and subscribed on CUCM. The address for the service should be pointed to the address of the container running this code http://<IP>:<port>/cfaMultiple.  By default the port is 4567.
 
-Based off DevNet JTAPI sample - `superProvider_deviceStateServer` - Demonstrates using CiscoProvider.createTerminal() to dynamically create a terminal by device name using the 'Superprovider' feature, then retrieves and monitors the device for device-side status changes using the 'Device State Server' feature.
+This functions independently of the CFwdALL button on the phone, but if the the primary line on the phone is in the list of extensions to be forwarded, pressing the CFwdALL softkey will cancel the forwarding only on the primary line. In this scenario, all the other lines in the list would stay forwarded, but there would be no visual indication on the phone.
+
+
 
 Visit the [DevNet JTAPI Site](https://developer.cisco.com/site/jtapi)
 
@@ -26,7 +28,10 @@ Visit the [DevNet JTAPI Site](https://developer.cisco.com/site/jtapi)
         - `Standard CTI Enabled`
 
         - `Standard CTI Allow Control of all Devices`
-- Shelly smart plug / relay - see https://shelly.cloud  or CyberData SIP strobe running v 20-3-0 or higher firmware
+
+        - `Control of the device to be forwarded`
+
+
 
 **Tested With:**
 
